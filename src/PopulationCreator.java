@@ -10,9 +10,6 @@ import java.io.OutputStreamWriter;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-/**
- * Created by Augusto on 09/11/2015.
- */
 public class PopulationCreator {
     public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, Text, IntWritable>{
         private final static IntWritable one = new IntWritable(1);
