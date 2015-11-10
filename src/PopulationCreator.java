@@ -3,6 +3,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.*;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -43,15 +44,26 @@ public class PopulationCreator {
         conf.setJobName("populationCreator");
         FileSystem fs = FileSystem.get(conf);
 
-//        Path inputTest = new Path("distributedKnapsack/files/inTest");
-        Path outputTest = new Path("distributedKnapsack/files/outTest");
+        createInitialPopulation(fs);
 
-//        if (!fs.exists(inputTest))
-//            printAndExit("Input file not found");
-//        if (!fs.isFile(inputTest))
-//            printAndExit("Input should be a file");
-//        if (fs.exists(outputTest))
-//            printAndExit("Output already exists");
+        conf.setOutputKeyClass(Text.class);
+        conf.setOutputValueClass(IntWritable.class);
+
+        conf.setMapperClass(Map.class);
+        conf.setCombinerClass(Reduce.class);
+        conf.setReducerClass(Reduce.class);
+
+        conf.setInputFormat(TextInputFormat.class);
+        conf.setOutputFormat(TextOutputFormat.class);
+
+        FileInputFormat.setInputPaths(conf, new Path("distributedKnapsack/files/input"));
+        FileOutputFormat.setOutputPath(conf, new Path("distributedKnapsack/files/output"));
+
+        JobClient.runJob(conf);
+    }
+
+    private static void createInitialPopulation(FileSystem fs) {
+        Path outputTest = new Path("distributedKnapsack/files/initialPopulation.knp");
 
         int maxPopulation = 100;
         Integer i = 0;
@@ -69,22 +81,6 @@ public class PopulationCreator {
         } catch (IOException e) {
             System.out.println("ERROR [main] - While initializing population");
         }
-
-
-        conf.setOutputKeyClass(Text.class);
-        conf.setOutputValueClass(IntWritable.class);
-
-        conf.setMapperClass(Map.class);
-        conf.setCombinerClass(Reduce.class);
-        conf.setReducerClass(Reduce.class);
-
-        conf.setInputFormat(TextInputFormat.class);
-        conf.setOutputFormat(TextOutputFormat.class);
-
-        FileInputFormat.setInputPaths(conf, new Path("distributedKnapsack/files/input"));
-        FileOutputFormat.setOutputPath(conf, new Path("distributedKnapsack/files/output"));
-
-        JobClient.runJob(conf);
     }
 
     static void printAndExit(String str) {
