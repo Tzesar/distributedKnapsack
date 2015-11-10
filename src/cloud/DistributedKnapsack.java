@@ -1,46 +1,22 @@
+package cloud;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.*;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.Iterator;
-import java.util.StringTokenizer;
+import java.util.Random;
 
-public class PopulationCreator {
-    public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, Text, IntWritable>{
-        private final static IntWritable one = new IntWritable(1);
-        private Text word = new Text();
+import cloud.CreateInitialPopulationMapReduce.*;
 
-        public void map(LongWritable key, Text value, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException{
-            String line = value.toString();
-            StringTokenizer tokenizer = new StringTokenizer(line);
-
-            while (tokenizer.hasMoreTokens()){
-                word.set(tokenizer.nextToken());
-                output.collect(word, one);
-            }
-        }
-    }
-
-    public static class Reduce extends MapReduceBase implements Reducer<Text, IntWritable, Text, IntWritable>{
-        public void reduce (Text key, Iterator<IntWritable> values, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException{
-            int sum = 0;
-
-            while (values.hasNext()){
-                sum += values.next().get();
-            }
-
-            output.collect(key, new IntWritable(sum));
-        }
-    }
+public class DistributedKnapsack {
 
     public static void main(String [] args) throws Exception {
-        JobConf conf = new JobConf(PopulationCreator.class);
+        JobConf conf = new JobConf(DistributedKnapsack.class);
         conf.setJobName("populationCreator");
         FileSystem fs = FileSystem.get(conf);
 
@@ -66,13 +42,14 @@ public class PopulationCreator {
         Path outputTest = new Path("distributedKnapsack/files/initialPopulation.knp");
 
         int maxPopulation = 100;
+        Random rand = new Random();
         Integer i = 0;
         try {
             BufferedWriter out = new BufferedWriter( new OutputStreamWriter(fs.create(outputTest, true)));
             while (i < maxPopulation) {
                 out.write(i.toString());
                 out.write(" ");
-                out.write("0");
+                out.write(""+rand.nextInt(Utils.maximumWeight));
                 out.write("\n");
 
                 i++;
@@ -81,10 +58,5 @@ public class PopulationCreator {
         } catch (IOException e) {
             System.out.println("ERROR [main] - While initializing population");
         }
-    }
-
-    static void printAndExit(String str) {
-        System.err.println(str);
-        System.exit(1);
     }
 }
