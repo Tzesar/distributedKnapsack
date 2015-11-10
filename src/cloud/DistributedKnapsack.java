@@ -12,18 +12,46 @@ import java.io.OutputStreamWriter;
 import java.util.Random;
 
 import cloud.CreateInitialPopulationMapReduce.*;
+import cloud.SelectGeneMapReduce.*;
 
 public class DistributedKnapsack {
 
     public static void main(String [] args) throws Exception {
-        int populationCount = 1;
-
+        int generationCount = 1;
 
         JobConf conf = new JobConf(DistributedKnapsack.class);
         FileSystem fs = FileSystem.get(conf);
-        conf.setJobName("populationCreator");
-
         createInitialPopulation(fs);
+
+        makePopulation(generationCount);
+
+        selectGenes(generationCount);
+    }
+
+    private static void selectGenes(int generationCount) throws Exception{
+        JobConf conf = new JobConf(DistributedKnapsack.class);
+        conf.setJobName("geneSelector-["+generationCount+"]");
+
+        conf.setOutputKeyClass(IntWritable.class);
+        conf.setOutputValueClass(Text.class);
+
+        conf.setMapperClass(SelectGeneMap.class);
+        conf.setCombinerClass(SelectGeneReduce.class);
+        conf.setReducerClass(SelectGeneReduce.class);
+
+        conf.setInputFormat(TextInputFormat.class);
+        conf.setOutputFormat(TextOutputFormat.class);
+
+        FileInputFormat.setInputPaths(conf, new Path(Utils.POPULATION_PREFIX +"-"+ (generationCount-1) + Utils.POPULATION_SUFFIX));
+        FileOutputFormat.setOutputPath(conf, new Path(Utils.POPULATION_PREFIX +"-"+ generationCount + Utils.POPULATION_SUFFIX));
+
+        JobClient.runJob(conf);
+    }
+
+    private static void makePopulation(int generationCount) throws Exception{
+        JobConf conf = new JobConf(DistributedKnapsack.class);
+        FileSystem fs = FileSystem.get(conf);
+        conf.setJobName("populationCreator-gen["+generationCount+"]");
 
         conf.setOutputKeyClass(IntWritable.class);
         conf.setOutputValueClass(Text.class);
@@ -36,7 +64,7 @@ public class DistributedKnapsack {
         conf.setOutputFormat(TextOutputFormat.class);
 
         FileInputFormat.setInputPaths(conf, new Path(Utils.INITIAL_POPULATION_FILE));
-        FileOutputFormat.setOutputPath(conf, new Path(Utils.POPULATION_PREFIX +"-"+ populationCount + Utils.POPULATION_SUFFIX));
+        FileOutputFormat.setOutputPath(conf, new Path(Utils.POPULATION_PREFIX +"-"+ generationCount + Utils.POPULATION_SUFFIX));
 
         JobClient.runJob(conf);
     }
