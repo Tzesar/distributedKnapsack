@@ -22,7 +22,7 @@ public class CreateInitialPopulationMapReduce {
 
             word.set(tokenizer.nextToken());
             String weight = tokenizer.nextToken();
-            for (int i = 0; i < Utils.populationSize; i++){
+            for (int i = 0; i < Utils.POPULATION_SIZE; i++){
                 itemKey = new IntWritable(i);
                 if (rand.nextFloat() > 0.5) {
                     output.collect(itemKey, new Text(weight));

@@ -17,6 +17,8 @@ public class DistributedKnapsack {
 
     public static void main(String [] args) throws Exception {
         int populationCount = 1;
+
+
         JobConf conf = new JobConf(DistributedKnapsack.class);
         FileSystem fs = FileSystem.get(conf);
         conf.setJobName("populationCreator");
@@ -33,8 +35,8 @@ public class DistributedKnapsack {
         conf.setInputFormat(TextInputFormat.class);
         conf.setOutputFormat(TextOutputFormat.class);
 
-        FileInputFormat.setInputPaths(conf, new Path("distributedKnapsack/files/initialPopulation.knp"));
-        FileOutputFormat.setOutputPath(conf, new Path("distributedKnapsack/files/population-"+ populationCount +".knp"));
+        FileInputFormat.setInputPaths(conf, new Path(Utils.INITIAL_POPULATION_FILE));
+        FileOutputFormat.setOutputPath(conf, new Path(Utils.POPULATION_PREFIX +"-"+ populationCount + Utils.POPULATION_SUFFIX));
 
         JobClient.runJob(conf);
     }
@@ -50,7 +52,7 @@ public class DistributedKnapsack {
             while (i < maxPopulation) {
                 out.write(i.toString());
                 out.write(" ");
-                out.write(""+rand.nextInt(Utils.maximumWeight));
+                out.write(""+rand.nextInt(Utils.MAXIMUM_WEIGHT));
                 out.write("\n");
 
                 i++;
