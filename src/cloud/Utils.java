@@ -8,6 +8,10 @@ public class Utils {
 
     public static final double CROSSOVER_PROBABILITY = 0.5;
     public static final double MUTATION_CHANCE = 0.04;
+    public static final int GONNA_MUTATE = 1;
+    public static final int REMAIN_UNCHANGED = 0;
+
+
 
     public static final String INITIAL_POPULATION_FILE = "distributedKnapsack/files/input/initialPopulation.knp";
     public static final String POPULATION_PREFIX = "distributedKnapsack/files/population";
