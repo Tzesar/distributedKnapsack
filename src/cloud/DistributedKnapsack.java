@@ -1,6 +1,7 @@
 package cloud;
 
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -30,6 +31,7 @@ public class DistributedKnapsack {
 
     private static void selectGenes(int generationCount) throws Exception{
         JobConf conf = new JobConf(DistributedKnapsack.class);
+        FileSystem fs = FileSystem.get(conf);
         conf.setJobName("geneSelector-["+generationCount+"]");
 
         conf.setOutputKeyClass(IntWritable.class);
@@ -42,10 +44,14 @@ public class DistributedKnapsack {
         conf.setInputFormat(TextInputFormat.class);
         conf.setOutputFormat(TextOutputFormat.class);
 
-        FileInputFormat.setInputPaths(conf, new Path(Utils.POPULATION_PREFIX +"-"+ (generationCount-1) + Utils.POPULATION_SUFFIX));
-        FileOutputFormat.setOutputPath(conf, new Path(Utils.POPULATION_PREFIX +"-"+ generationCount + Utils.POPULATION_SUFFIX));
+        Path outputPath = new Path(Utils.SELECTED_PREFIX +"-"+ generationCount);
+        FileInputFormat.setInputPaths(conf, new Path(Utils.POPULATION_PREFIX +"-"+ (generationCount) + Utils.POPULATION_SUFFIX));
+        FileOutputFormat.setOutputPath(conf, outputPath);
 
         JobClient.runJob(conf);
+
+        Path mergedOutputPath = new Path(Utils.SELECTED_PREFIX +"-"+ generationCount + Utils.POPULATION_SUFFIX);
+        FileUtil.copyMerge(fs, outputPath, fs, mergedOutputPath, true, conf, "");
     }
 
     private static void makePopulation(int generationCount) throws Exception{
@@ -63,16 +69,20 @@ public class DistributedKnapsack {
         conf.setInputFormat(TextInputFormat.class);
         conf.setOutputFormat(TextOutputFormat.class);
 
+        Path outputPath = new Path(Utils.POPULATION_PREFIX +"-"+ generationCount);
         FileInputFormat.setInputPaths(conf, new Path(Utils.INITIAL_POPULATION_FILE));
-        FileOutputFormat.setOutputPath(conf, new Path(Utils.POPULATION_PREFIX +"-"+ generationCount + Utils.POPULATION_SUFFIX));
+        FileOutputFormat.setOutputPath(conf, outputPath);
 
         JobClient.runJob(conf);
+
+        Path mergedOutputPath = new Path(Utils.POPULATION_PREFIX +"-"+ generationCount + Utils.POPULATION_SUFFIX);
+        FileUtil.copyMerge(fs, outputPath, fs, mergedOutputPath, true, conf, "");
     }
 
     private static void createInitialPopulation(FileSystem fs) {
         Path outputTest = new Path("distributedKnapsack/files/initialPopulation.knp");
 
-        int maxPopulation = 100;
+        int maxPopulation = 30;
         Random rand = new Random();
         Integer i = 0;
         try {
@@ -80,7 +90,7 @@ public class DistributedKnapsack {
             while (i < maxPopulation) {
                 out.write(i.toString());
                 out.write(" ");
-                out.write(""+rand.nextInt(Utils.MAXIMUM_WEIGHT));
+                out.write(""+rand.nextInt(15));
                 out.write("\n");
 
                 i++;
