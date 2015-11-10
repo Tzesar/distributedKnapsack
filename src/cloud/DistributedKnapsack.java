@@ -16,24 +16,25 @@ import cloud.CreateInitialPopulationMapReduce.*;
 public class DistributedKnapsack {
 
     public static void main(String [] args) throws Exception {
+        int populationCount = 1;
         JobConf conf = new JobConf(DistributedKnapsack.class);
-        conf.setJobName("populationCreator");
         FileSystem fs = FileSystem.get(conf);
+        conf.setJobName("populationCreator");
 
         createInitialPopulation(fs);
 
         conf.setOutputKeyClass(Text.class);
-        conf.setOutputValueClass(IntWritable.class);
+        conf.setOutputValueClass(Text.class);
 
-        conf.setMapperClass(Map.class);
-        conf.setCombinerClass(Reduce.class);
-        conf.setReducerClass(Reduce.class);
+        conf.setMapperClass(GenerateGeneMap.class);
+        conf.setCombinerClass(GenerateGeneReduce.class);
+        conf.setReducerClass(GenerateGeneReduce.class);
 
         conf.setInputFormat(TextInputFormat.class);
         conf.setOutputFormat(TextOutputFormat.class);
 
-        FileInputFormat.setInputPaths(conf, new Path("distributedKnapsack/files/input"));
-        FileOutputFormat.setOutputPath(conf, new Path("distributedKnapsack/files/output"));
+        FileInputFormat.setInputPaths(conf, new Path("distributedKnapsack/files/initialPopulation.knp"));
+        FileOutputFormat.setOutputPath(conf, new Path("distributedKnapsack/files/population-"+ populationCount +".knp"));
 
         JobClient.runJob(conf);
     }

@@ -7,7 +7,7 @@ JCLASSPATH = -classpath /usr/hdp/2.3.0.0-2557/hadoop/hadoop-common.jar:/usr/hdp/
 JDEBUG = -g
 JOUTPUT = -d classes/
 
-default: deleteOutput runJar
+default: runJar
 
 runJar: target/distributedKnapsack.jar
 	yarn jar target/distributedKnapsack.jar cloud.DistributedKnapsack
