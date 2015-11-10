@@ -39,8 +39,11 @@ public class CreateInitialPopulationMapReduce {
 
             while (values.hasNext()){
                 String nextValue = values.next().toString();
-                if ( !nextValue.isEmpty() || nextValue.length() > 0 ) {
-                    sb.append(nextValue).append(";");
+                if ( !nextValue.isEmpty() && nextValue.length() > 0 && !"".equals(nextValue) ) {
+                    sb.append(nextValue);
+                    if ( values.hasNext() ){
+                        sb.append(";");
+                    }
                 }
             }
 

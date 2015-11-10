@@ -9,7 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Utils {
     public static final int MAXIMUM_WEIGHT = 500;
     public static final int POPULATION_SIZE = 50;
-    public static final int ITEM_COUNT = 40;
+    public static final int ITEM_COUNT = 30;
     public static final int TOTAL_CAPACITY = 800;
 
     public static final double CROSSOVER_PROBABILITY = 0.5;
@@ -22,9 +22,11 @@ public class Utils {
     public static final String INITIAL_POPULATION_FILE = "distributedKnapsack/files/input/initialPopulation.knp";
     public static final String POPULATION_PREFIX = "distributedKnapsack/files/population";
     public static final String SELECTED_PREFIX = "distributedKnapsack/files/selected";
+    public static final String CROSSOVER_PREFIX = "distributedKnapsack/files/crossover";
     public static final String POPULATION_SUFFIX = ".knp";
     public static final int SURVIVES_KEY = 1;
     public static final int PERISHES_KEY = 2;
+    public static final int MAXIMUM_GENERATION = 5;
 
     public static Logger logger = LoggerFactory.getLogger(Utils.class);
 
