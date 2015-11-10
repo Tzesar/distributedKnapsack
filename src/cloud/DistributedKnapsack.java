@@ -23,7 +23,7 @@ public class DistributedKnapsack {
 
         createInitialPopulation(fs);
 
-        conf.setOutputKeyClass(Text.class);
+        conf.setOutputKeyClass(IntWritable.class);
         conf.setOutputValueClass(Text.class);
 
         conf.setMapperClass(GenerateGeneMap.class);

@@ -11,10 +11,10 @@ import java.util.Random;
 import java.util.StringTokenizer;
 
 public class CreateInitialPopulationMapReduce {
-    public static class GenerateGeneMap extends MapReduceBase implements Mapper<LongWritable, Text, Text, Text> {
+    public static class GenerateGeneMap extends MapReduceBase implements Mapper<LongWritable, Text, IntWritable, Text> {
         private Text word = new Text();
 
-        public void map(LongWritable key, Text value, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+        public void map(LongWritable key, Text value, OutputCollector<IntWritable, Text> output, Reporter reporter) throws IOException {
             String line = value.toString();
             StringTokenizer tokenizer = new StringTokenizer(line);
             IntWritable itemKey;
@@ -25,21 +25,21 @@ public class CreateInitialPopulationMapReduce {
             for (int i = 0; i < Utils.populationSize; i++){
                 itemKey = new IntWritable(i);
                 if (rand.nextFloat() > 0.5) {
-                    output.collect(new Text(itemKey.get() + ""), new Text(weight));
+                    output.collect(itemKey, new Text(weight));
                 } else {
-                    output.collect(new Text(itemKey.get() + ""), new Text("0"));
+                    output.collect(itemKey, new Text("0"));
                 }
             }
         }
     }
 
-    public static class GenerateGeneReduce extends MapReduceBase implements Reducer<Text, Text, Text, Text> {
-        public void reduce (Text key, Iterator<Text> values, OutputCollector<Text, Text> output, Reporter reporter) throws IOException{
+    public static class GenerateGeneReduce extends MapReduceBase implements Reducer<IntWritable, Text, IntWritable, Text> {
+        public void reduce (IntWritable key, Iterator<Text> values, OutputCollector<IntWritable, Text> output, Reporter reporter) throws IOException{
             StringBuilder sb = new StringBuilder();
 
             while (values.hasNext()){
                 String nextValue = values.next().toString();
-                if ( !nextValue.isEmpty() ) {
+                if ( !nextValue.isEmpty() || nextValue.length() > 0 ) {
                     sb.append(nextValue).append(";");
                 }
             }
