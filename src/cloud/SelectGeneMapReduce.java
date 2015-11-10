@@ -25,7 +25,6 @@ public class SelectGeneMapReduce {
             logger.info("Gene: "+gene);
             int fitness = Utils.calculateFitness(gene);
             logger.info("Fitness: "+fitness);
-//            output.collect(new IntWritable(Utils.SURVIVES_KEY), new Text(fitness+""));
             if ( fitness > selectionProbability ){
                 output.collect(new IntWritable(Utils.SURVIVES_KEY), new Text(gene));
             } else {
@@ -36,6 +35,7 @@ public class SelectGeneMapReduce {
     }
 
     public static class SelectGeneReduce extends MapReduceBase implements Reducer<IntWritable, Text, IntWritable, Text> {
+        Logger logger = LoggerFactory.getLogger(SelectGeneReduce.class);
 
         public void reduce (IntWritable key, Iterator<Text> values, OutputCollector<IntWritable, Text> output, Reporter reporter) throws IOException{
             List<String> selectedGenes = new ArrayList<String>();
@@ -43,8 +43,10 @@ public class SelectGeneMapReduce {
             if ( Utils.SURVIVES_KEY == key.get() ) {
                 while (values.hasNext()) {
                     String nextValue = values.next().toString();
-                        selectedGenes.add(nextValue);
+                    selectedGenes.add(nextValue);
                 }
+
+                logger.info("Values: "+ selectedGenes.size());
 
                 if (selectedGenes.size() % 2 != 0) {
                     Random random = ThreadLocalRandom.current();
@@ -53,8 +55,9 @@ public class SelectGeneMapReduce {
                     selectedGenes.add(selectedGenes.get(clonedGeneIndex));
                 }
 
-                Integer geneKey = 0;
+                int geneKey = 0;
                 for (String gene : selectedGenes) {
+                    logger.info("GeneKey: "+ geneKey +" Gene:"+gene);
                     output.collect(new IntWritable(geneKey), new Text(gene));
                     geneKey++;
                 }

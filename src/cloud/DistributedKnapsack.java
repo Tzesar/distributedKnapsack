@@ -38,14 +38,13 @@ public class DistributedKnapsack {
         conf.setOutputValueClass(Text.class);
 
         conf.setMapperClass(SelectGeneMap.class);
-        conf.setCombinerClass(SelectGeneReduce.class);
         conf.setReducerClass(SelectGeneReduce.class);
 
         conf.setInputFormat(TextInputFormat.class);
         conf.setOutputFormat(TextOutputFormat.class);
 
         Path outputPath = new Path(Utils.SELECTED_PREFIX +"-"+ generationCount);
-        FileInputFormat.setInputPaths(conf, new Path(Utils.POPULATION_PREFIX +"-"+ (generationCount) + Utils.POPULATION_SUFFIX));
+        FileInputFormat.setInputPaths(conf, new Path(Utils.POPULATION_PREFIX +"-"+ generationCount + Utils.POPULATION_SUFFIX));
         FileOutputFormat.setOutputPath(conf, outputPath);
 
         JobClient.runJob(conf);
@@ -80,7 +79,7 @@ public class DistributedKnapsack {
     }
 
     private static void createInitialPopulation(FileSystem fs) {
-        Path outputTest = new Path("distributedKnapsack/files/initialPopulation.knp");
+        Path outputTest = new Path(Utils.INITIAL_POPULATION_FILE);
 
         int maxPopulation = 30;
         Random rand = new Random();
