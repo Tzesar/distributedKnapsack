@@ -17,16 +17,17 @@ public class Utils {
     public static final int GONNA_MUTATE = 1;
     public static final int REMAIN_UNCHANGED = 0;
 
-
-
     public static final String INITIAL_POPULATION_FILE = "distributedKnapsack/files/input/initialPopulation.knp";
     public static final String POPULATION_PREFIX = "distributedKnapsack/files/population";
     public static final String SELECTED_PREFIX = "distributedKnapsack/files/selected";
     public static final String CROSSOVER_PREFIX = "distributedKnapsack/files/crossover";
-    public static final String POPULATION_SUFFIX = ".knp";
+    public static final String FILES_SUFFIX = ".knp";
+    public static final String OPTIMUM_SOLUTION_FILE = "distributedKnapsack/files/input/optimumSolution";
+    public static final int MAXIMUM_GENERATION = 5;
+
     public static final int SURVIVES_KEY = 1;
     public static final int PERISHES_KEY = 2;
-    public static final int MAXIMUM_GENERATION = 5;
+    public static final int FITTEST_KEY = 1;
 
     public static Logger logger = LoggerFactory.getLogger(Utils.class);
 

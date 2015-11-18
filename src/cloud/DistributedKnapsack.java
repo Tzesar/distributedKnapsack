@@ -15,6 +15,7 @@ import java.util.Random;
 import cloud.CreateInitialPopulationMapReduce.*;
 import cloud.SelectGeneMapReduce.*;
 import cloud.CrossOverMapReduce.*;
+import cloud.SelectFittestSolutionMapReduce.*;
 
 public class DistributedKnapsack {
 
@@ -24,11 +25,13 @@ public class DistributedKnapsack {
         createInitialPopulation(fs);
 
         makePopulation(1);
-        for( int generationCount = 1; generationCount <= Utils.MAXIMUM_GENERATION; generationCount++ ) {
+        int generationCount = 1;
+        for( generationCount = 1; generationCount <= Utils.MAXIMUM_GENERATION; generationCount++ ) {
             selectGenes(generationCount);
             crossoverGenes(generationCount);
         }
 
+        selectFittestSolution(Utils.POPULATION_PREFIX+ "-" + generationCount + Utils.FILES_SUFFIX);
     }
 
     private static void makePopulation(int generationCount) throws Exception{
@@ -52,7 +55,7 @@ public class DistributedKnapsack {
 
         JobClient.runJob(conf);
 
-        Path mergedOutputPath = new Path(Utils.POPULATION_PREFIX +"-"+ generationCount + Utils.POPULATION_SUFFIX);
+        Path mergedOutputPath = new Path(Utils.POPULATION_PREFIX +"-"+ generationCount + Utils.FILES_SUFFIX);
         FileUtil.copyMerge(fs, outputPath, fs, mergedOutputPath, true, conf, "");
     }
 
@@ -71,12 +74,12 @@ public class DistributedKnapsack {
         conf.setOutputFormat(TextOutputFormat.class);
 
         Path outputPath = new Path(Utils.SELECTED_PREFIX +"-"+ generationCount);
-        FileInputFormat.setInputPaths(conf, new Path(Utils.POPULATION_PREFIX +"-"+ generationCount + Utils.POPULATION_SUFFIX));
+        FileInputFormat.setInputPaths(conf, new Path(Utils.POPULATION_PREFIX +"-"+ generationCount + Utils.FILES_SUFFIX));
         FileOutputFormat.setOutputPath(conf, outputPath);
 
         JobClient.runJob(conf);
 
-        Path mergedOutputPath = new Path(Utils.SELECTED_PREFIX +"-"+ generationCount + Utils.POPULATION_SUFFIX);
+        Path mergedOutputPath = new Path(Utils.SELECTED_PREFIX +"-"+ generationCount + Utils.FILES_SUFFIX);
         FileUtil.copyMerge(fs, outputPath, fs, mergedOutputPath, true, conf, "");
     }
 
@@ -95,25 +98,25 @@ public class DistributedKnapsack {
         conf.setOutputFormat(TextOutputFormat.class);
 
         Path outputPath = new Path(Utils.CROSSOVER_PREFIX +"-"+ generationCount);
-        FileInputFormat.setInputPaths(conf, new Path(Utils.SELECTED_PREFIX +"-"+ generationCount + Utils.POPULATION_SUFFIX));
+        FileInputFormat.setInputPaths(conf, new Path(Utils.SELECTED_PREFIX +"-"+ generationCount + Utils.FILES_SUFFIX));
         FileOutputFormat.setOutputPath(conf, outputPath);
 
         JobClient.runJob(conf);
 
-        Path mergedOutputPath = new Path(Utils.CROSSOVER_PREFIX +"-"+ generationCount + Utils.POPULATION_SUFFIX);
+        Path mergedOutputPath = new Path(Utils.CROSSOVER_PREFIX +"-"+ generationCount + Utils.FILES_SUFFIX);
         FileUtil.copyMerge(fs, outputPath, fs, mergedOutputPath, true, conf, "");
 
-        FileUtil.copy(fs, mergedOutputPath, fs, new Path(Utils.POPULATION_PREFIX+"-"+ (generationCount + 1) + Utils.POPULATION_SUFFIX), false, false, conf);
+        FileUtil.copy(fs, mergedOutputPath, fs, new Path(Utils.POPULATION_PREFIX+"-"+ (generationCount + 1) + Utils.FILES_SUFFIX), false, false, conf);
     }
 
     private static void createInitialPopulation(FileSystem fs) {
-        Path outputTest = new Path(Utils.INITIAL_POPULATION_FILE);
+        Path outputFile = new Path(Utils.INITIAL_POPULATION_FILE);
 
         int maxPopulation = Utils.ITEM_COUNT;
         Random rand = new Random();
         Integer i = 0;
         try {
-            BufferedWriter out = new BufferedWriter( new OutputStreamWriter(fs.create(outputTest, true)));
+            BufferedWriter out = new BufferedWriter( new OutputStreamWriter(fs.create(outputFile, true)));
             while (i < maxPopulation) {
                 out.write(i.toString());
                 out.write(" ");
@@ -126,5 +129,30 @@ public class DistributedKnapsack {
         } catch (IOException e) {
             System.out.println("ERROR [main] - While initializing population");
         }
+    }
+
+    private static void selectFittestSolution(String finalPopulationPathString) throws Exception{
+        JobConf conf = new JobConf(DistributedKnapsack.class);
+        FileSystem fs = FileSystem.get(conf);
+
+        conf.setJobName("selectFittestSolution-from-["+ finalPopulationPathString +"]");
+
+        conf.setOutputKeyClass(IntWritable.class);
+        conf.setOutputValueClass(Text.class);
+
+        conf.setMapperClass(SelectOptimumMap.class);
+        conf.setReducerClass(SelectOptimumReduce.class);
+
+        conf.setInputFormat(TextInputFormat.class);
+        conf.setOutputFormat(TextOutputFormat.class);
+
+        Path outputPath = new Path(Utils.OPTIMUM_SOLUTION_FILE);
+        FileInputFormat.setInputPaths(conf, new Path(finalPopulationPathString));
+        FileOutputFormat.setOutputPath(conf, outputPath);
+
+        JobClient.runJob(conf);
+
+        Path mergedOutputPath = new Path(Utils.OPTIMUM_SOLUTION_FILE + Utils.FILES_SUFFIX);
+        FileUtil.copyMerge(fs, outputPath, fs, mergedOutputPath, true, conf, "");
     }
 }
