@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Random;
 
-import cloud.CreateInitialPopulationMapReduce.*;
+import cloud.GenerateGeneMapReduce.*;
 import cloud.SelectGeneMapReduce.*;
 import cloud.CrossOverMapReduce.*;
 import cloud.SelectFittestSolutionMapReduce.*;

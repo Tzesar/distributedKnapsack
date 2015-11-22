@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-public class CreateInitialPopulationMapReduce {
+public class GenerateGeneMapReduce {
     public static class GenerateGeneMap extends MapReduceBase implements Mapper<LongWritable, Text, IntWritable, Text> {
         private Text word = new Text();
 
